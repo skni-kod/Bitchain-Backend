@@ -1,0 +1,16 @@
+# Git
+.gitignore
+.git
+
+# Docker
+.docker
+
+# Python
+
+bitchain/__pycache__
+bitchain/*/__pycache__
+bitchain/*/*/__pycache__
+bitchain/*/*/*/__pycache__
+.env/
+.venv/
+venv/
