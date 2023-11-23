@@ -4,14 +4,12 @@ services:
   app:
     build:
       context: .
-      args:
-        - DEV=true
     ports:
       - "8000:8000"
     volumes:
       - ./bitchain:/bitchain
     command: >
-      sh -c "python manage.py runserver"
+      sh -c "python manage.py wait_for_db && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
       
 
     environment:
