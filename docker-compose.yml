@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      args:
+        - DEV=true
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./bitchain:/bitchain
+    command: >
+      sh -c "python manage.py runserver"
+      
+
+    environment:
+      - DB_HOST=db
+      - DB_NAME=devdb
+      - DB_USER=devuser
+      - DB_PASS=devpass
+    depends_on:
+      - db
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - dev-db-data:/var/lib/postgresql/data
+    environment:
+        - POSTGRES_DB=devdb
+        - POSTGRES_USER=devuser
+        - POSTGRES_PASSWORD=devpass
+
+volumes:
+  dev-db-data:
