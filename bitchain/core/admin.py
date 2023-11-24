@@ -14,7 +14,9 @@ class UserAdmin(BaseUserAdmin):
         (None, {'fields': ('password', )}),
         (_('Personal info'), {'fields': ('full_name', 'nick_name', 'date_of_birth',)}),
         (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',)}),
+        (_('Important dates'), {'fields': ('last_login', )}),
     )
+    readonly_fields = {'email', 'pesel', }
 
     def date_of_birth_format(self, obj):
         return obj.date_of_birth.strftime("%Y-%m-%d")
