@@ -44,6 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     password = models.CharField(max_length=128)
     full_name = models.CharField(max_length=255)
     nick_name = models.CharField(max_length=255, unique=True)
+    account_balance = models.DecimalField(max_digits=16, decimal_places=2, default=0.00)
     date_of_birth = models.DateField()
     pesel = models.CharField(max_length=11, unique=True)
     is_active = models.BooleanField(default=True)
