@@ -1,3 +1,6 @@
+import os
+import uuid
+
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser, BaseUserManager, PermissionsMixin
@@ -38,8 +41,16 @@ class UserManager(BaseUserManager):
         return user
 
 
+def get_upload_path(instance, filename):
+    ext = os.path.splitext(filename)[1]
+    filename = f'{instance.id}{ext}'
+
+    return os.path.join('uploads', 'user',  filename)
+
+
 class User(AbstractBaseUser, PermissionsMixin):
     """Custom user model that supports using email instead of username"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(max_length=255, unique=True)
     password = models.CharField(max_length=128)
     full_name = models.CharField(max_length=255)
@@ -47,6 +58,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     account_balance = models.DecimalField(max_digits=16, decimal_places=2, default=0.00)
     date_of_birth = models.DateField()
     pesel = models.CharField(max_length=11, unique=True)
+    image = models.ImageField(null=True, upload_to=get_upload_path, blank=True, default=os.path.join('uploads', 'user',
+                                                                                                      'default.jpg'))
+
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
@@ -54,3 +68,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'email'  # default is username
     REQUIRED_FIELDS = ['full_name', 'nick_name', 'date_of_birth', 'pesel']
+
+    def __str__(self):
+        return self.email

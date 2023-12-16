@@ -1,5 +1,8 @@
+import os
+
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.conf import settings
 
 
 class ModelTests(TestCase):
@@ -105,3 +108,13 @@ class ModelTests(TestCase):
 
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
+
+
+class DefaultImageTestCase(TestCase):
+    def test_default_image_exists(self):
+        """Test if default.jpg exists in the media directory"""
+
+        absolute_path = os.path.abspath(os.path.join('..', settings.MEDIA_ROOT, settings.DEFAULT_AVATAR_PATH))
+        file_exists = os.path.isfile(absolute_path)
+
+        self.assertTrue(file_exists)

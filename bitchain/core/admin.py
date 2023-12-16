@@ -7,12 +7,12 @@ from core import models
 class UserAdmin(BaseUserAdmin):
     """User admin class"""
     ordering = ['id']
-    list_display = ['email', 'full_name', 'nick_name', 'date_of_birth_format', 'pesel']
+    list_display = ['email', 'full_name', 'nick_name', 'date_of_birth_format', 'pesel', 'account_balance', 'image']
 
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'full_name', 'nick_name', 'date_of_birth', 'pesel', 'password1', 'password2',),
+            'fields': ('email', 'full_name', 'nick_name', 'date_of_birth', 'pesel', 'password1', 'password2', 'image'),
         }),
     )
     fieldsets = (
