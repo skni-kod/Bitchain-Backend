@@ -64,3 +64,25 @@ class AuthTokenSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+
+
+class UserImageSerializer(serializers.ModelSerializer):
+    """Serializer for uploading images to users"""
+    class Meta:
+        model = get_user_model()
+        fields = ('image',)
+
+    def update(self, instance, validated_data):
+        """Update a user, setting the image correctly and return it."""
+        image = validated_data.pop('image', None)
+
+        user = super().update(instance, validated_data)
+
+        if image:
+            user.image = image
+            user.save()
+        return user
+
+
+
+

@@ -130,7 +130,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = 'static/static/'
+STATIC_ROOT = '../vol/web/static'
+
+MEDIA_URL = 'static/media/'
+MEDIA_ROOT = '../vol/web/media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -145,3 +149,10 @@ REST_FRAMEWORK = {
 
 # CORS settings - allow all origins
 CORS_ALLOW_ALL_ORIGINS = True # change this on production!!!
+
+# default user avatar path
+DEFAULT_AVATAR_PATH = 'uploads/user/default.jpg'
+
+SPECTACULAR_SETTINGS = {
+    'COMPONENT_SPLIT_REQUEST': True,
+}
