@@ -64,15 +64,13 @@ class UpdateUserImageView(APIView):
     def delete(self, request, *args, **kwargs):
         user = self.request.user
         absolute_path = os.path.abspath(os.path.join('..', settings.MEDIA_ROOT, user.image.name))
-        print(user.image.path)
-        # Replace 'image' field with default value
 
-        # Save the user object to update the image field
-        user.save()
-        # delete the old image file if it exists
         file_exists = os.path.isfile(absolute_path)
         if file_exists and user.image.name != settings.DEFAULT_AVATAR_PATH:
             os.remove(absolute_path)  # Remove the custom image file
+            user.image.name = settings.DEFAULT_AVATAR_PATH
+            
+        user.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
