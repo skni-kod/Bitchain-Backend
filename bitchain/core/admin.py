@@ -29,3 +29,11 @@ class UserAdmin(BaseUserAdmin):
 
 
 admin.site.register(models.User, UserAdmin)
+
+
+class FavoriteUserCryptocurrencyAdmin(admin.ModelAdmin):
+    """FavoriteUserCryptocurrency admin class"""
+    list_display = ['user', 'favorite_crypto_symbol']
+
+
+admin.site.register(models.FavoriteUserCryptocurrency, FavoriteUserCryptocurrencyAdmin)
