@@ -12,11 +12,15 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.parsers import FormParser, MultiPartParser
 
+from drf_spectacular.utils import extend_schema
+
+from core.models import FavoriteUserCryptocurrency
 
 from user.serializers import (
     UserSerializer,
     AuthTokenSerializer,
-    UserImageSerializer
+    UserImageSerializer,
+    FavoriteUserCryptocurrencySerializer,
 )
 
 
@@ -81,3 +85,39 @@ class UpdateUserImageView(APIView):
             serializer.data,
             status=status.HTTP_200_OK
         )
+        
+    
+class FavoriteUserCryptocurrencyView(APIView):
+    """View for managing user's favorite cryptocurrencies."""
+
+    serializer_class = FavoriteUserCryptocurrencySerializer
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+        favorites = FavoriteUserCryptocurrency.objects.filter(user=user)
+        symbols = [favorite.favorite_crypto_symbol for favorite in favorites]
+        favorites = {"favorite_crypto_symbol": symbols}
+        return Response(favorites, status=status.HTTP_200_OK)
+
+    def put(self, request, *args, **kwargs):
+        try:
+            # Delete all FavoriteUserCryptocurrency objects for the current user
+            FavoriteUserCryptocurrency.objects.filter(user=request.user).delete()
+
+            # Retrieve the list of favorite cryptocurrencies from the request
+            favorite_crypto_list = request.data.get('favorite_crypto_symbol', [])
+
+            # Add new favorite cryptocurrencies
+            for crypto_symbol in favorite_crypto_list:
+                FavoriteUserCryptocurrency.objects.create(user=request.user, favorite_crypto_symbol=crypto_symbol)
+
+            updated_favorites = list(FavoriteUserCryptocurrency.objects.filter(user=request.user))
+            serializer = self.serializer_class(updated_favorites, many=True)
+
+            return Response({'success': True, 'message': 'Favorites updated successfully', 'data': serializer.data}, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
