@@ -154,15 +154,15 @@ class FavoriteUserCryptocurrencyModelTestCase(TestCase):
                 pesel=USER_EXAMPLE['pesel'],
                 )
         # Creating two FavoriteUserCryptocurrency objects with the same user but different cryptocurrencies
-        favorite1 = FavoriteUserCryptocurrency.objects.create(user=user, cryptocurrency_symbol='BTC')
-        favorite2 = FavoriteUserCryptocurrency.objects.create(user=user, cryptocurrency_symbol='ETH')
+        favorite1 = FavoriteUserCryptocurrency.objects.create(user=user, favorite_crypto_symbol='BTC')
+        favorite2 = FavoriteUserCryptocurrency.objects.create(user=user, favorite_crypto_symbol='ETH')
 
         # Checking if the objects are created correctly
         self.assertEqual(favorite1.user, user)
-        self.assertEqual(favorite1.cryptocurrency_symbol, 'BTC')
+        self.assertEqual(favorite1.favorite_crypto_symbol, 'BTC')
         self.assertEqual(favorite2.user, user)
-        self.assertEqual(favorite2.cryptocurrency_symbol, 'ETH')
+        self.assertEqual(favorite2.favorite_crypto_symbol, 'ETH')
 
         # Attempting to create a second object with the same user and the same cryptocurrency should result in an error
         with self.assertRaises(Exception):
-            FavoriteUserCryptocurrency.objects.create(user=user, cryptocurrency_symbol='BTC')
+            FavoriteUserCryptocurrency.objects.create(user=user, favorite_crypto_symbol='BTC')
