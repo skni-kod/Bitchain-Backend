@@ -7,6 +7,8 @@ from django.contrib.auth import (
 )
 from rest_framework import serializers
 
+from core.models import FavoriteUserCryptocurrency
+
 from django.utils.translation import gettext as _
 
 
@@ -84,5 +86,9 @@ class UserImageSerializer(serializers.ModelSerializer):
         return user
 
 
-
+class FavoriteUserCryptocurrencySerializer(serializers.ModelSerializer):
+    """Serializer for favorite user cryptocurrency objects."""
+    class Meta:
+        model = FavoriteUserCryptocurrency
+        fields = ('favorite_crypto_symbol',)
 
