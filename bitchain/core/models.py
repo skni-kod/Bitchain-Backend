@@ -71,3 +71,16 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+class FavoriteUserCryptocurrency(models.Model):
+    """Model for storing multiple favorite cryptocurrencies for a user"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    favorite_crypto_symbol = models.CharField(max_length=10)
+
+    class Meta:
+        unique_together = ('user', 'favorite_crypto_symbol')
+
+
+    def __str__(self):
+        return f'{self.user.email} - {self.favorite_crypto_symbol}'
