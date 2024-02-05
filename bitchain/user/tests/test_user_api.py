@@ -43,28 +43,6 @@ class PublicUserApiTests(TestCase):
         self.assertTrue(user.check_password(payload['password']))
         self.assertNotIn('password', res.data)
 
-    def test_user_with_existing_pesel(self):
-        """Test creating a user with an existing PESEL fails"""
-        create_user(
-            email='existing@example.com',
-            password='existing123',
-            full_name='Existing User',
-            nick_name='Existing',
-            date_of_birth='1990-01-01',
-            pesel='90010100000',  # PESEL that already exists in the database
-        )
-        payload = {
-            'email': 'new@example.com',
-            'password': 'new123',
-            'full_name': 'New User',
-            'nick_name': 'New',
-            'date_of_birth': '1991-01-01',
-            'pesel': '90010100000',  # Same PESEL as the existing user
-        }
-        res = self.client.post(CREATE_USER_URL, payload)
-
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-
     def test_user_with_existing_nick_name(self):
         """Test creating a user with an existing nick_name fails"""
         create_user(

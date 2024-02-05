@@ -57,7 +57,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     nick_name = models.CharField(max_length=255, unique=True)
     account_balance = models.DecimalField(max_digits=16, decimal_places=2, default=0.00)
     date_of_birth = models.DateField()
-    pesel = models.CharField(max_length=11, unique=True)
+    pesel = models.CharField(max_length=11)
     image = models.ImageField(null=True, upload_to=get_upload_path, blank=True, default=os.path.join('uploads', 'user',
                                                                                                       'default.jpg'))
 

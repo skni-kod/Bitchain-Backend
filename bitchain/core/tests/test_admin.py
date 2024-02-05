@@ -20,7 +20,7 @@ class AdminSiteTests(TestCase):
             full_name='Test Admin',
             nick_name='TestAdmin',  # nick_name must be unique
             date_of_birth='1990-01-01',
-            pesel='90010100000',  # pesel must be unique
+            pesel='90010100000', 
             )
         self.client.force_login(self.admin_user)
         self.user = get_user_model().objects.create_user(
@@ -29,7 +29,7 @@ class AdminSiteTests(TestCase):
             full_name='Test User',
             nick_name='TestUser',  # nick_name must be unique
             date_of_birth='1991-02-01',
-            pesel='90010100001',  # pesel must be unique
+            pesel='90010100001', 
             )
 
     def test_users_listed(self):
