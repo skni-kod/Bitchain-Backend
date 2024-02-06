@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     # Local apps
     'core',
     'user',
+    'crypto_reviews',
 ]
 
 MIDDLEWARE = [
