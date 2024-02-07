@@ -5,6 +5,8 @@
 __pycache__
 db.sqlite3
 media
+# Ignore Celery Beat schedule file for celerybeat service. It is generated automatically after docker-compose up
+celerybeat-schedule
 
 # Backup files #
 *.bak
