@@ -11,23 +11,59 @@ services:
       - dev-static-data:/vol/web
     command: >
       sh -c "python manage.py wait_for_db && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-      
-
     environment:
       - DB_HOST=db
       - DB_NAME=devdb
       - DB_USER=devuser
       - DB_PASS=devpass
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
       - db
+      - redis
+      - celery
+      - celery-beat
+
   db:
     image: postgres:16-alpine
     volumes:
       - dev-db-data:/var/lib/postgresql/data
     environment:
-        - POSTGRES_DB=devdb
-        - POSTGRES_USER=devuser
-        - POSTGRES_PASSWORD=devpass
+      - POSTGRES_DB=devdb
+      - POSTGRES_USER=devuser
+      - POSTGRES_PASSWORD=devpass
+
+  redis:
+    image: "redis:6.0-alpine"
+    container_name: "redis"
+    ports:
+      - "6379:6379"
+
+  celery:
+    build:
+      context: .
+    command: celery -A bitchain worker --loglevel=info
+    environment:
+      - DJANGO_SETTINGS_MODULE=bitchain.settings
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - DB_HOST=db
+      - DB_NAME=devdb
+      - DB_USER=devuser
+      - DB_PASS=devpass
+
+  celery-beat:
+    build:
+      context: .
+    command: celery -A bitchain beat --loglevel=info
+    environment:
+      - DJANGO_SETTINGS_MODULE=bitchain.settings
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - DB_HOST=db
+      - DB_NAME=devdb
+      - DB_USER=devuser
+      - DB_PASS=devpass
 
 volumes:
   dev-db-data:
