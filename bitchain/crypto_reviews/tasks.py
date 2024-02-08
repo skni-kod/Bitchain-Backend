@@ -27,7 +27,7 @@ def initialize_on_startup_check_update_crypto_review():
     """
     try: 
         last_update_date = CryptoReview.objects.values_list('last_reset_date', flat=True).first()
-        if last_update_date != timezone.now().date():
+        if last_update_date != timezone.now().date() and last_update_date != None:
             # Perform the update if needed
             CryptoReview.objects.all().update(good=0, bad=0, last_reset_date=timezone.now().date())
             print("Initialization task on Docker startup - Data updated\n")
