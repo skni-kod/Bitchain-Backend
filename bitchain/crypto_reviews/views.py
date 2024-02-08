@@ -54,12 +54,6 @@ class CryptoReviewView(APIView):
     def patch(self, request, symbol):
         crypto_review = get_or_create_crypto_review(symbol)
 
-        today = timezone.now().date()
-        if crypto_review.last_reset_date < today:
-            crypto_review.good = 0
-            crypto_review.bad = 0
-            crypto_review.last_reset_date = today
-
         action = request.data.get('action', None)
         if action:
             if action == 'good':
