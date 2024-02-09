@@ -1,5 +1,3 @@
-# /bitchain/bitchain/management/commands/copy_media.py
-
 import os
 import shutil
 from django.core.management.base import BaseCommand
@@ -9,15 +7,15 @@ class Command(BaseCommand):
     help = 'Copy media files to another directory'
 
     def handle(self, *args, **options):
+        # Get the absolute path of the source and destination directories
         source_dir = os.path.abspath(os.path.join(settings.BASE_DIR, 'media'))
         destination_dir = os.path.abspath(os.path.join(settings.MEDIA_ROOT, ))
-        print('absSource:', source_dir)
-        print('absDestination:', destination_dir)
+        
         try:
-            # Utwórz katalog docelowy, jeśli nie istnieje
+            # Create the destination directory if it doesn't exist
             os.makedirs(destination_dir, exist_ok=True)
-            
-            # Skopiuj katalog źródłowy wraz z zawartością do katalogu docelowego
+
+            # Copy the entire source directory with its contents to the destination directory
             shutil.copytree(source_dir, destination_dir, dirs_exist_ok=True)
 
             self.stdout.write(self.style.SUCCESS('Media files copied successfully'))
