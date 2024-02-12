@@ -14,4 +14,5 @@ urlpatterns = [
     path('me/', views.ManageUserView.as_view(), name='me'),
     path('me/image/', views.UpdateUserImageView.as_view(), name='me-image'),
     path('me/favorite-cryptocurrency/', views.FavoriteUserCryptocurrencyView.as_view(), name='me-favorite-cryptocurrency'),
+    path('me/check-password/', views.CheckUserPasswordView.as_view(), name='me-check-password')
 ]
