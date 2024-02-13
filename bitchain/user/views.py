@@ -12,6 +12,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.parsers import FormParser, MultiPartParser
 
+from rest_framework.authtoken.models import Token
+
 from django.contrib.auth.hashers import check_password
 
 from drf_spectacular.utils import extend_schema
@@ -51,7 +53,11 @@ class CreateTokenView(ObtainAuthToken):
     },
     )
     def post(self, request, *args, **kwargs):
-        super().post(request, *args, **kwargs)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key})
     
 
 
