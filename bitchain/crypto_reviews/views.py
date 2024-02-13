@@ -28,12 +28,12 @@ def get_or_create_crypto_review(symbol):
         crypto_review.save()
     return crypto_review
 
-@extend_schema(
-    description="Get or create a CryptoReview for the specified symbol.",
-    responses={status.HTTP_200_OK: CryptoReviewSerializer}
-)
-class CryptoReviewView(APIView):
 
+class CryptoReviewView(APIView):
+    @extend_schema(
+        description="Get or create a CryptoReview for the specified symbol.",
+        responses={200: {"example": {"symbol": "string", "good": 0, "bad": 0}}}
+    )
     def get(self, request, symbol):
         crypto_review = get_or_create_crypto_review(symbol)
         serializer = CryptoReviewSerializer(crypto_review)
@@ -45,9 +45,9 @@ class CryptoReviewView(APIView):
                 "example": {"action": "good"},
             }
         },
-        responses={200: CryptoReviewSerializer(many=False),
-                   400: {"error": "Action not provided"},
-                   404: {"error": "CryptoReview not found for symbol"}
+        responses={
+            200: {"example": {"symbol": "string", "good": 1, "bad": 0}},
+            400: {"example": {"error": "Action not provided"}},
         },
         description="If action is 'good' or 'bad', increment the count for the specified symbol."
     )
