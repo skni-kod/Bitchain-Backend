@@ -1,3 +1,6 @@
+"""
+Models for the core app of the project, mostly for user related data
+"""
 import os
 import uuid
 
@@ -15,14 +18,19 @@ class UserManager(BaseUserManager):
 
         if not email:
             raise ValueError('User must have an email address')
+        
         if not password:
             raise ValueError('User must have a password')
+        
         if not full_name:
             raise ValueError('User must have a full name')
+        
         if not nick_name:
             raise ValueError('User must have a nick name')
+        
         if not date_of_birth:
             raise ValueError('User must have a date of birth')
+        
         if not pesel:
             raise ValueError('User must have a pesel')
 
@@ -84,3 +92,17 @@ class FavoriteUserCryptocurrency(models.Model):
 
     def __str__(self):
         return f'{self.user.email} - {self.favorite_crypto_symbol}'
+    
+
+class UserTransaction(models.Model):
+    """Model for storing user transactions"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    transcation_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    transaction_type = models.CharField(max_length=10)
+    transaction_amount = models.IntegerField()
+    transcation_currency = models.CharField(max_length=10)
+    transaction_price_usd = models.DecimalField(max_digits=16, decimal_places=2)
+    transaction_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user.email}'

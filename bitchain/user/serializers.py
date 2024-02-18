@@ -7,7 +7,7 @@ from django.contrib.auth import (
 )
 from rest_framework import serializers
 
-from core.models import FavoriteUserCryptocurrency
+from core.models import FavoriteUserCryptocurrency, UserTransaction
 
 from django.utils.translation import gettext as _
 
@@ -91,4 +91,18 @@ class FavoriteUserCryptocurrencySerializer(serializers.ModelSerializer):
     class Meta:
         model = FavoriteUserCryptocurrency
         fields = ('favorite_crypto_symbol',)
+        
+
+class UserTransactionSerializer(serializers.ModelSerializer):
+    """Serializer for user transaction objects."""
+    class Meta:
+        model = UserTransaction
+        fields = ('transcation_id',
+                  'transaction_date',
+                  'transaction_type',
+                  'transaction_amount',
+                  'transaction_price_usd',
+                  'transcation_currency',)
+
+
 
