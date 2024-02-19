@@ -17,4 +17,7 @@ urlpatterns = [
     path('me/check-password/', views.CheckUserPasswordView.as_view(), name='me-check-password'),
     path('me/create-transaction/', views.UserCreateTransactionView.as_view(), name='me-transaction'),
     path('me/transactions/', views.UserListTransactionView.as_view(), name='me-list-transaction'),
+    path('api/user_wallet_cryptos/', views.UserWalletCryptocurrencyAPIView.as_view(), name='user_wallet_cryptos_api'),
+  
+    
 ]

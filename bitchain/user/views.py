@@ -18,14 +18,20 @@ from django.contrib.auth.hashers import check_password
 
 from drf_spectacular.utils import extend_schema
 
-from core.models import FavoriteUserCryptocurrency, UserTransaction
+from core.models import (
+    FavoriteUserCryptocurrency,
+    UserTransaction,
+    UserWallet,
+    UserWalletCryptocurrency,
+)
 
 from user.serializers import (
     UserSerializer,
     AuthTokenSerializer,
     UserImageSerializer,
     FavoriteUserCryptocurrencySerializer,
-    UserTransactionSerializer
+    UserTransactionSerializer,
+    UserWalletCryptocurrencySerializer
 )
 
 
@@ -351,3 +357,72 @@ class UserCreateTransactionView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
+
+class UserWalletCryptocurrencyAPIView(APIView):
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = UserWalletCryptocurrencySerializer
+    
+    @extend_schema(
+        description="Retrieve a list of user wallet cryptocurrencies",
+        responses={
+            200: {
+                "example": [
+                    {
+                        "cryptocurrency_symbol": "BTC",
+                        "cryptocurrency_amount": 1
+                    },
+                    {
+                        "cryptocurrency_symbol": "ETH",
+                        "cryptocurrency_amount": 2
+                    }
+                ],
+            },
+        },
+    )
+    def get(self, request):
+        user_wallet_cryptos = UserWalletCryptocurrency.objects.filter(wallet__user=request.user)
+        serializer = UserWalletCryptocurrencySerializer(user_wallet_cryptos, many=True)
+        return Response(serializer.data)
+
+    extend_schema(
+        description="Update user wallet cryptocurrency",
+        request={
+            "application/json": {
+                "example": {
+                    "cryptocurrency_symbol": "BTC",
+                    "cryptocurrency_amount": 1
+                }
+            }
+        },
+        responses={
+            200: {
+                "example": {
+                    "cryptocurrency_symbol": "BTC",
+                    "cryptocurrency_amount": 1
+                },
+            },
+            400: {
+                "example": {
+                    "error": "error message"
+                },
+            },
+        },
+    )
+    def patch(self, request):
+        serializer = UserWalletCryptocurrencySerializer(data=request.data)
+        if serializer.is_valid():
+            symbol = serializer.validated_data['cryptocurrency_symbol']
+            amount_change = serializer.validated_data['cryptocurrency_amount']
+
+            user_wallet, created = UserWallet.objects.get_or_create(user=request.user)
+            user_wallet_crypto, created = UserWalletCryptocurrency.objects.get_or_create(
+                wallet=user_wallet,
+                cryptocurrency_symbol=symbol,
+                defaults={'cryptocurrency_amount': 0}
+            )
+
+            serializer.update(user_wallet_crypto, serializer.validated_data)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

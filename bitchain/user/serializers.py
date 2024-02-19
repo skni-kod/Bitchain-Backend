@@ -7,7 +7,8 @@ from django.contrib.auth import (
 )
 from rest_framework import serializers
 
-from core.models import FavoriteUserCryptocurrency, UserTransaction
+from core.models import FavoriteUserCryptocurrency, UserTransaction, UserWalletCryptocurrency
+
 
 from django.utils.translation import gettext as _
 
@@ -105,4 +106,19 @@ class UserTransactionSerializer(serializers.ModelSerializer):
                   'transcation_currency',)
 
 
+class UserWalletCryptocurrencySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserWalletCryptocurrency
+        fields = ['cryptocurrency_symbol', 'cryptocurrency_amount']
+        
 
+    def update(self, instance, validated_data):
+        symbol = validated_data['cryptocurrency_symbol']
+        amount_change = validated_data['cryptocurrency_amount']
+
+        if amount_change < 0 and instance.cryptocurrency_amount < abs(amount_change):
+            raise serializers.ValidationError({"error": "Not enough cryptocurrency to make the transaction."})
+
+        instance.cryptocurrency_amount += amount_change
+        instance.save()
+        return instance
