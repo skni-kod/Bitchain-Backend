@@ -283,7 +283,7 @@ class UserCreateTransactionView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     
     @extend_schema(
-        description="Retrieve a list of user transactions",
+        description="Create transaction",
             request={
             "application/json": {
                 "example": {
