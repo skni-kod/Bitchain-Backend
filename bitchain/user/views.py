@@ -18,13 +18,14 @@ from django.contrib.auth.hashers import check_password
 
 from drf_spectacular.utils import extend_schema
 
-from core.models import FavoriteUserCryptocurrency
+from core.models import FavoriteUserCryptocurrency, UserTransaction
 
 from user.serializers import (
     UserSerializer,
     AuthTokenSerializer,
     UserImageSerializer,
     FavoriteUserCryptocurrencySerializer,
+    UserTransactionSerializer
 )
 
 
@@ -207,3 +208,146 @@ class FavoriteUserCryptocurrencyView(APIView):
         
         except Exception as e:
             return Response({'success': False, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class UserListTransactionView(APIView):
+    """
+    API View for managing user transactions.
+
+    - GET: Retrieve a list of user transactions.
+
+    Requires Token authentication and user permission.
+    """
+
+    serializer_class = UserTransactionSerializer
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+    @extend_schema(
+        description="Retrieve a list of user transactions",
+        responses={
+            200: {
+                "example": [
+                    {
+                        "transcation_id": "235f7c39-122c-4629-a8aa-629d6d2fcc4c",
+                        "transaction_date": "2024-02-16T20:32:59.576735+01:00",
+                        "transaction_type": "buy",
+                        "transaction_amount": 1,
+                        "transaction_price_usd": "2.00",
+                        "transcation_currency": "BTC"
+                    },
+                    {
+                        "transcation_id": "b7cf5cd7-f55e-4ea5-b233-44a66cec5a12",
+                        "transaction_date": "2024-02-16T20:33:02.395862+01:00",
+                        "transaction_type": "buy",
+                        "transaction_amount": 1,
+                        "transaction_price_usd": "2.00",
+                        "transcation_currency": "BTC"
+                    },
+                ],
+            },
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        """
+        Retrieve a list of user transactions.
+
+        Returns:
+        - 200 OK with a list of user transactions.
+        """
+        try:
+            user = self.request.user
+            transactions = UserTransaction.objects.filter(user=user)
+
+            if not transactions:
+                return Response({"transaction": "empty"}, status=status.HTTP_200_OK)
+
+            serializer = self.serializer_class(transactions, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class UserCreateTransactionView(APIView):
+    """
+    API View for managing user transactions.
+
+    - POST: Create a new user transaction.
+
+    Requires Token authentication and user permission.
+    """
+
+    serializer_class = UserTransactionSerializer
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+    
+    @extend_schema(
+        description="Create transaction",
+            request={
+            "application/json": {
+                "example": {
+                "transaction_type": "buy",
+                "transaction_amount": 1,
+                "transaction_price_usd": "2.00",
+                "transaction_currency": "BTC"
+                }
+            }
+        },
+        responses={
+            200: {
+                "example": {
+                    "transcation_id": "235f7c39-122c-4629-a8aa-629d6d2fcc4c",
+                    "transaction_date": "2024-02-16T20:32:59.576735+01:00",
+                    "transaction_type": "buy",
+                    "transaction_amount": 1,
+                    "transaction_price_usd": 2.00,
+                    "transcation_currency": "BTC"
+                },
+            },
+        },
+        
+    )
+    def post(self, request, *args, **kwargs):
+        """
+        Create a new user transaction.
+
+        Returns:
+        - 201 Created with details of the created transaction.
+        - 400 Bad Request if the request data is invalid.
+        """
+        try:
+            user = self.request.user
+            transaction_type = self.request.data.get('transaction_type', None)
+            transaction_amount = self.request.data.get('transaction_amount', None)
+            transaction_currency = self.request.data.get('transaction_currency', None)
+            transaction_price_usd = self.request.data.get('transaction_price_usd', None)
+
+            if not transaction_type:
+                return Response({"error": "Transaction type not provided"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            if not transaction_amount:
+                return Response({"error": "Transaction amount not provided"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            if not transaction_currency:
+                return Response({"error": "Transaction currency not provided"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            if not transaction_price_usd:
+                return Response({"error": "Transaction price not provided"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            transaction = UserTransaction.objects.create(
+                user=user,
+                transaction_type=transaction_type,
+                transaction_amount=transaction_amount,
+                transcation_currency=transaction_currency,
+                transaction_price_usd=transaction_price_usd
+            )
+            if not transaction:
+                return Response({"error": "Transaction not created"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            serializer = self.serializer_class(transaction)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    

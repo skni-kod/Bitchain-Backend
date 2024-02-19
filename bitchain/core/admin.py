@@ -1,7 +1,12 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext as _
-from core import models
+from core.models import (
+    FavoriteUserCryptocurrency,
+    UserTransaction, 
+    User,
+    )
+from crypto_reviews.models import CryptoReview
 
 
 class UserAdmin(BaseUserAdmin):
@@ -28,12 +33,14 @@ class UserAdmin(BaseUserAdmin):
     date_of_birth_format.short_description = 'Date of birth'
 
 
-admin.site.register(models.User, UserAdmin)
 
 
 class FavoriteUserCryptocurrencyAdmin(admin.ModelAdmin):
     """FavoriteUserCryptocurrency admin class"""
     list_display = ['user', 'favorite_crypto_symbol']
+    
 
-
-admin.site.register(models.FavoriteUserCryptocurrency, FavoriteUserCryptocurrencyAdmin)
+admin.site.register(User, UserAdmin)
+admin.site.register(FavoriteUserCryptocurrency, FavoriteUserCryptocurrencyAdmin)
+admin.site.register(CryptoReview)
+admin.site.register(UserTransaction)
