@@ -5,6 +5,8 @@ from core.models import (
     FavoriteUserCryptocurrency,
     UserTransaction, 
     User,
+    UserWalletCryptocurrency,
+    UserWallet
     )
 from crypto_reviews.models import CryptoReview
 
@@ -44,3 +46,5 @@ admin.site.register(User, UserAdmin)
 admin.site.register(FavoriteUserCryptocurrency, FavoriteUserCryptocurrencyAdmin)
 admin.site.register(CryptoReview)
 admin.site.register(UserTransaction)
+admin.site.register(UserWallet)
+admin.site.register(UserWalletCryptocurrency)
