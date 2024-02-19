@@ -106,3 +106,15 @@ class UserTransaction(models.Model):
 
     def __str__(self):
         return f'{self.user.email}'
+    
+class UserWallet(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    
+
+class UserWalletCryptocurrency(models.Model):
+    wallet = models.ForeignKey(UserWallet, on_delete=models.CASCADE)
+    cryptocurrency_symbol = models.CharField(max_length=10)
+    cryptocurrency_amount = models.DecimalField(max_digits=16, decimal_places=10, default=0.00)
+
+    def __str__(self):
+        return f"{self.wallet.user.username} - {self.cryptocurrency_symbol} - {self.cryptocurrency_amount}"
