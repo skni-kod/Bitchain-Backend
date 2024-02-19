@@ -117,7 +117,7 @@ class UserWalletCryptocurrencySerializer(serializers.ModelSerializer):
         amount_change = validated_data['cryptocurrency_amount']
 
         if amount_change < 0 and instance.cryptocurrency_amount < abs(amount_change):
-            raise serializers.ValidationError({"error": "masz malego elo"})
+            raise serializers.ValidationError({"error": "Not enough cryptocurrency to make the transaction."})
 
         instance.cryptocurrency_amount += amount_change
         instance.save()
