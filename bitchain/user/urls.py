@@ -1,7 +1,7 @@
 """
 URL mapping for user app.
 """
-from django.urls import path
+from django.urls import path, include
 
 from user import views
 
@@ -15,9 +15,10 @@ urlpatterns = [
     path('me/image/', views.UpdateUserImageView.as_view(), name='me-image'),
     path('me/favorite-cryptocurrency/', views.FavoriteUserCryptocurrencyView.as_view(), name='me-favorite-cryptocurrency'),
     path('me/check-password/', views.CheckUserPasswordView.as_view(), name='me-check-password'),
+    path('me/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
     path('me/create-transaction/', views.UserCreateTransactionView.as_view(), name='me-transaction'),
     path('me/transactions/', views.UserListTransactionView.as_view(), name='me-list-transaction'),
-    path('api/user_wallet_cryptos/', views.UserWalletCryptocurrencyAPIView.as_view(), name='user_wallet_cryptos_api'),
+    path('me/user_wallet_cryptos/', views.UserWalletCryptocurrencyAPIView.as_view(), name='user_wallet_cryptos_api'),
   
     
 ]
