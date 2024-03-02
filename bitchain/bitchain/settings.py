@@ -47,13 +47,13 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'corsheaders',
     'django_celery_beat',
+    'django_rest_passwordreset',
 
     # Local apps
     'core',
     'user',
-    'crypto_reviews',
+    'crypto_reviews',  
     
-
 ]
 
 MIDDLEWARE = [
@@ -167,3 +167,18 @@ SPECTACULAR_SETTINGS = {
 CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 CELERY_BEAT_SCHEDULE_FILENAME = str(Path(__file__).resolve().parent / 'celerybeat-schedule')
+
+FRONTED_URL = 'http://localhost:3000'
+BACKEND_URL = 'http://localhost:8000'
+
+# email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = os.environ.get('EMAIL_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASS')
+DEAFULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# password reset settings
+DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME = 0.5 # (in hours) 30 minutes

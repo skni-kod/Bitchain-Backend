@@ -10,7 +10,7 @@ services:
       - ./bitchain:/bitchain
       - dev-static-data:/vol/web
     command: >
-      sh -c "python manage.py wait_for_db && python manage.py copy_media && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+      sh -c "python manage.py wait_for_db && python manage.py move_media && python manage.py move_static && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     environment:
       - DB_HOST=db
       - DB_NAME=devdb
@@ -21,8 +21,8 @@ services:
     depends_on:
       - db
       - redis
-      - celery
-      - celery-beat
+    env_file:
+      - .env
 
   db:
     image: postgres:16-alpine
@@ -51,6 +51,10 @@ services:
       - DB_NAME=devdb
       - DB_USER=devuser
       - DB_PASS=devpass
+    depends_on:
+      - db
+      - redis
+      - app
 
   celery-beat:
     build:
@@ -64,6 +68,10 @@ services:
       - DB_NAME=devdb
       - DB_USER=devuser
       - DB_PASS=devpass
+    depends_on:
+      - db
+      - redis
+      - app
 
 volumes:
   dev-db-data:

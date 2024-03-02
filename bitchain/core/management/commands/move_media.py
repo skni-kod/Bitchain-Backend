@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 
 class Command(BaseCommand):
-    help = 'Copy media files to another directory'
+    help = 'Copy media files to another directory in docker container'
 
     def handle(self, *args, **options):
         # Get the absolute path of the source and destination directories
