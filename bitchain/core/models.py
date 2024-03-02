@@ -116,7 +116,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         msg = EmailMultiAlternatives(
             # title:
-            f"Password Reset for {title}",
+            "Password Reset for Bitchain",
             # message:
             email_plaintext_message,
             # from:
