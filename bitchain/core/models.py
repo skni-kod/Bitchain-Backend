@@ -105,11 +105,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         
         # send an e-mail to the user
         context = {
-            'current_user': reset_password_token.user,
             'username': reset_password_token.user.nick_name,
             'email': reset_password_token.user.email,
             'reset_password_url': reset_password_url,
-            'site_name': 'Bitchain',
         }
 
         # render email text
@@ -118,7 +116,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         msg = EmailMultiAlternatives(
             # title:
-            "Password Reset for {title}".format(title="Bitchain"),
+            f"Password Reset for {title}",
             # message:
             email_plaintext_message,
             # from:
@@ -128,6 +126,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         )
         msg.attach_alternative(email_html_message, "text/html")
         msg.send()
+
 
 class FavoriteUserCryptocurrency(models.Model):
     """Model for storing multiple favorite cryptocurrencies for a user"""
