@@ -141,9 +141,44 @@ class FavoriteUserCryptocurrency(models.Model):
         return f'{self.user.email} - {self.favorite_crypto_symbol}'
     
 
+
+class UserGenericWallet(models.Model):
+    
+    
+    class Meta:
+        abstract = True 
+
+
+class UserFeatureWallet(UserGenericWallet):
+    pass
+    
+
+class UserStackingWallet(UserGenericWallet):
+    pass
+
+
+class UserFundWallet(UserGenericWallet):
+    pass
+
+
+class UserWalletOverview(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    fund_wallet = models.OneToOneField(UserFeatureWallet, on_delete=models.CASCADE)
+    stacking_wallet = models.OneToOneField(UserFeatureWallet, on_delete=models.CASCADE)
+    feature_wallet = models.OneToOneField(UserFeatureWallet, on_delete=models.CASCADE)
+    
+
+class UserWalletCryptocurrency(models.Model):
+    wallet = models.ForeignKey(UserGenericWallet, on_delete=models.CASCADE)
+    cryptocurrency_symbol = models.CharField(max_length=10)
+    cryptocurrency_amount = models.DecimalField(max_digits=16, decimal_places=10, default=0.00)
+
+    def __str__(self):
+        return f"{self.wallet.user.username} - {self.cryptocurrency_symbol} - {self.cryptocurrency_amount}"
+    
 class UserTransaction(models.Model):
     """Model for storing user transactions"""
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_wallet_type = models.ForeignKey(UserGenericWallet, on_delete=models.CASCADE)
     transcation_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     transaction_type = models.CharField(max_length=10)
     transaction_amount = models.IntegerField()
@@ -153,15 +188,3 @@ class UserTransaction(models.Model):
 
     def __str__(self):
         return f'{self.user.email}'
-    
-class UserWallet(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    
-
-class UserWalletCryptocurrency(models.Model):
-    wallet = models.ForeignKey(UserWallet, on_delete=models.CASCADE)
-    cryptocurrency_symbol = models.CharField(max_length=10)
-    cryptocurrency_amount = models.DecimalField(max_digits=16, decimal_places=10, default=0.00)
-
-    def __str__(self):
-        return f"{self.wallet.user.username} - {self.cryptocurrency_symbol} - {self.cryptocurrency_amount}"
