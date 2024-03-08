@@ -3,10 +3,14 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext as _
 from core.models import (
     FavoriteUserCryptocurrency,
-    UserTransaction, 
+    UserFundTransaction, 
+    UserFeatureTransaction,
+    UserStackingTransaction,
+    UserFundWallet,
+    UserFeatureWallet,
+    UserStackingWallet,
     User,
     UserWalletCryptocurrency,
-    UserWallet
     )
 from crypto_reviews.models import CryptoReview
 
@@ -45,6 +49,9 @@ class FavoriteUserCryptocurrencyAdmin(admin.ModelAdmin):
 admin.site.register(User, UserAdmin)
 admin.site.register(FavoriteUserCryptocurrency, FavoriteUserCryptocurrencyAdmin)
 admin.site.register(CryptoReview)
-admin.site.register(UserTransaction)
-admin.site.register(UserWallet)
-admin.site.register(UserWalletCryptocurrency)
+admin.site.register(UserFundTransaction) 
+admin.site.register(UserFeatureTransaction)
+admin.site.register(UserStackingTransaction)
+admin.site.register(UserFundWallet)
+admin.site.register(UserFeatureWallet)
+admin.site.register(UserStackingWallet)
