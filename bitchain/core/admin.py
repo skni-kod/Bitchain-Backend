@@ -3,10 +3,16 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext as _
 from core.models import (
     FavoriteUserCryptocurrency,
-    UserTransaction, 
+    UserFundTransaction, 
+    # UserFeatureTransaction,
+    # UserStackingTransaction,
+    UserFundWallet,
+    UserFundWalletCryptocurrency,
+    # UserFeatureWallet,
+    # UserStackingWallet,
     User,
-    UserWalletCryptocurrency,
-    UserWallet
+    UserWalletOverview,
+    # UserWalletCryptocurrency,
     )
 from crypto_reviews.models import CryptoReview
 
@@ -14,7 +20,7 @@ from crypto_reviews.models import CryptoReview
 class UserAdmin(BaseUserAdmin):
     """User admin class"""
     ordering = ['id']
-    list_display = ['email', 'full_name', 'nick_name', 'date_of_birth_format', 'pesel', 'account_balance', 'image']
+    list_display = ['email', 'full_name', 'nick_name', 'date_of_birth_format', 'pesel', 'image']
 
     add_fieldsets = (
         (None, {
@@ -45,6 +51,11 @@ class FavoriteUserCryptocurrencyAdmin(admin.ModelAdmin):
 admin.site.register(User, UserAdmin)
 admin.site.register(FavoriteUserCryptocurrency, FavoriteUserCryptocurrencyAdmin)
 admin.site.register(CryptoReview)
-admin.site.register(UserTransaction)
-admin.site.register(UserWallet)
-admin.site.register(UserWalletCryptocurrency)
+admin.site.register(UserFundTransaction) 
+# admin.site.register(UserFeatureTransaction)
+# admin.site.register(UserStackingTransaction)
+admin.site.register(UserFundWallet)
+admin.site.register(UserFundWalletCryptocurrency)
+admin.site.register(UserWalletOverview)
+# admin.site.register(UserFeatureWallet)
+# admin.site.register(UserStackingWallet)

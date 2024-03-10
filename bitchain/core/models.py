@@ -3,15 +3,18 @@ Models for the core app of the project, mostly for user related data
 """
 import os
 import uuid
+from django.contrib.contenttypes.fields import GenericRelation
 
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser, BaseUserManager, PermissionsMixin
 )
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from django_rest_passwordreset.signals import reset_password_token_created
-from django.dispatch import receiver
 from django.core.mail import EmailMultiAlternatives
+
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
@@ -70,12 +73,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     password = models.CharField(max_length=128)
     full_name = models.CharField(max_length=255)
     nick_name = models.CharField(max_length=255, unique=True)
-    account_balance = models.DecimalField(max_digits=16, decimal_places=2, default=0.00)
     date_of_birth = models.DateField()
     pesel = models.CharField(max_length=11)
     image = models.ImageField(null=True, upload_to=get_upload_path, blank=True, default=os.path.join('uploads', 'user',
                                                                                                       'default.jpg'))
-
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
@@ -130,7 +131,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class FavoriteUserCryptocurrency(models.Model):
     """Model for storing multiple favorite cryptocurrencies for a user"""
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
     favorite_crypto_symbol = models.CharField(max_length=10)
 
     class Meta:
@@ -139,29 +140,77 @@ class FavoriteUserCryptocurrency(models.Model):
 
     def __str__(self):
         return f'{self.user.email} - {self.favorite_crypto_symbol}'
-    
 
-class UserTransaction(models.Model):
-    """Model for storing user transactions"""
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    transcation_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    transaction_type = models.CharField(max_length=10)
-    transaction_amount = models.IntegerField()
-    transcation_currency = models.CharField(max_length=10)
-    transaction_price_usd = models.DecimalField(max_digits=16, decimal_places=2)
-    transaction_date = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f'{self.user.email}'
-    
-class UserWallet(models.Model):
+class UserWalletOverview(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     
+    def __str__(self):
+        return f"wallet overview - {self.user.email}"
+    
+    
+class UserBaseWallet(models.Model):
+    wallet_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
 
-class UserWalletCryptocurrency(models.Model):
-    wallet = models.ForeignKey(UserWallet, on_delete=models.CASCADE)
+
+class UserTransactionBase(models.Model):
+    """Model for storing user transactions"""
+    transaction_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    transaction_type = models.CharField(max_length=10)
+    transaction_amount = models.IntegerField()
+    transaction_currency = models.CharField(max_length=10)
+    transaction_price_usd = models.DecimalField(max_digits=16, decimal_places=2)
+    transaction_date = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        abstract = True
+
+@receiver(post_save, sender=User)
+def create_user_wallets(sender, instance, created, **kwargs):
+    if created:
+        UserWalletOverview.objects.create(user=instance)
+        UserFundWallet.objects.create(fund_wallet=UserWalletOverview.objects.get(user=instance))
+
+@receiver(post_save, sender=User)
+def save_user_wallets(sender, instance, **kwargs):
+    instance.userwalletoverview.save()
+    UserFundWallet.objects.get(fund_wallet=UserWalletOverview.objects.get(user=instance)).save()
+
+class UserFundWallet(UserBaseWallet):
+    fund_wallet = models.OneToOneField(UserWalletOverview, null=True, blank=True, on_delete=models.CASCADE)
+    wallet_type = models.CharField(max_length=10, default='fund', editable=False)
+    
+    def __str__(self):
+        return f"fund wallet - {self.wallet_id } - {self.fund_wallet.user.email}"
+    
+    
+class UserFundTransaction(UserTransactionBase):
+    fund_wallet = models.ForeignKey(UserFundWallet, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f"fund transaction - {self.transaction_id} - {self.fund_wallet.fund_wallet.user.email}"
+
+
+class UserFundWalletCryptocurrency(models.Model):
+    wallet_fund_id = models.ForeignKey(UserFundWallet, on_delete=models.CASCADE)
     cryptocurrency_symbol = models.CharField(max_length=10)
     cryptocurrency_amount = models.DecimalField(max_digits=16, decimal_places=10, default=0.00)
 
-    def __str__(self):
-        return f"{self.wallet.user.username} - {self.cryptocurrency_symbol} - {self.cryptocurrency_amount}"
+# class UserFeatureWallet(UserBaseWallet):
+#     feature_wallet = models.OneToOneField(UserWalletOverview, null=True, blank=True, on_delete=models.CASCADE)
+#     wallet_type = models.CharField(max_length=10, default='feature', editable=False)
+
+
+# class UserFeatureTransaction(UserTransactionBase):
+#     feature_wallet = models.ForeignKey(UserFeatureWallet, on_delete=models.CASCADE)
+
+
+# class UserStackingWallet(UserBaseWallet):
+#     stacking_wallet = models.OneToOneField(UserWalletOverview, null=True, blank=True, on_delete=models.CASCADE)
+#     wallet_type = models.CharField(max_length=10, default='stacking', editable=False)
+
+
+# class UserStackingTransaction(UserTransactionBase):
+#     stacking_wallet = models.ForeignKey(UserStackingWallet, on_delete=models.CASCADE)
+
