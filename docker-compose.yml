@@ -32,6 +32,8 @@ services:
       - POSTGRES_DB=devdb
       - POSTGRES_USER=devuser
       - POSTGRES_PASSWORD=devpass
+    ports:
+      - "5432:5432"
 
   redis:
     image: "redis:6.0-alpine"
@@ -54,7 +56,6 @@ services:
     depends_on:
       - db
       - redis
-      - app
 
   celery-beat:
     build:
@@ -71,7 +72,6 @@ services:
     depends_on:
       - db
       - redis
-      - app
 
 volumes:
   dev-db-data:
