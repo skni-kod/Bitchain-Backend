@@ -21,7 +21,10 @@ from drf_spectacular.utils import extend_schema
 from core.models import (
     FavoriteUserCryptocurrency,
     UserFundWallet,
-    UserWalletCryptocurrency,
+    UserFundTransaction,
+    UserWalletOverview,
+    UserFundWalletCryptocurrency,
+    
 )
 
 from user.serializers import (
@@ -29,6 +32,8 @@ from user.serializers import (
     AuthTokenSerializer,
     UserImageSerializer,
     FavoriteUserCryptocurrencySerializer,
+    UserFundTransactionSerializer,
+    UserFundWalletCryptoSerializer,
 )
 
 
@@ -212,3 +217,73 @@ class FavoriteUserCryptocurrencyView(APIView):
         except Exception as e:
             return Response({'success': False, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+
+
+class UserFundTransactionView(APIView):
+    """Create a new user fund transaction in the system."""
+    
+    serializer_class = UserFundTransactionSerializer
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+
+    def post(self, request, *args, **kwargs):
+        user = self.request.user
+        serializer = self.serializer_class(data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save(user=user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserFundTranasctionsListView(generics.ListAPIView):
+    "Retrieve a list of user fund transactions in the system."
+    
+    queryset = UserFundTransaction.objects.all()
+    serializer_class = UserFundTransactionSerializer
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+    
+    def get_queryset(self):
+        user = self.request.user
+        return self.queryset.filter(fund_wallet=UserFundWallet.objects.get(fund_wallet=UserWalletOverview.objects.get(user=user)))
+    
+    
+class UserFundWalletCryptoChangeView(APIView):
+    """Change the cryptocurrency in the user's fund wallet.
+    if amount is positive, it will add the amount to the wallet.
+    if amount is negative, it will subtract the amount from the wallet.
+    """
+    serializer_class = UserFundWalletCryptoSerializer
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def patch(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            symbol = serializer.validated_data['cryptocurrency_symbol']
+
+            user_wallet_crypto, created = UserFundWalletCryptocurrency.objects.get_or_create(
+                wallet_fund_id=UserFundWallet.objects.get(fund_wallet=UserWalletOverview.objects.get(user=request.user)),
+                cryptocurrency_symbol=symbol,
+                defaults={'cryptocurrency_amount': 0}            
+                )
+
+            serializer.update(user_wallet_crypto, serializer.validated_data)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class UserFundWalletCryptoListView(generics.ListAPIView):
+    """Retrieve a list of cryptocurrencies in the user's fund wallet."""
+    queryset = UserFundWalletCryptocurrency.objects.all()
+    serializer_class = UserFundWalletCryptoSerializer
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        user = self.request.user
+        return self.queryset.filter(wallet_fund_id=UserFundWallet.objects.get(fund_wallet=UserWalletOverview.objects.get(user=user)))

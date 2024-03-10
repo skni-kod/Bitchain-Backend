@@ -10,7 +10,9 @@ from rest_framework import serializers
 from core.models import (
     FavoriteUserCryptocurrency,
     UserFundTransaction,
-    UserWalletCryptocurrency,
+    UserWalletOverview,
+    UserFundWallet,
+    UserFundWalletCryptocurrency,
 )
 
 
@@ -33,6 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """Create a new user with encrypted password and return it."""
+
         return get_user_model().objects.create_user(**validated_data)
 
     def update(self, instance, validated_data):
@@ -96,4 +99,47 @@ class FavoriteUserCryptocurrencySerializer(serializers.ModelSerializer):
     class Meta:
         model = FavoriteUserCryptocurrency
         fields = ('favorite_crypto_symbol',)
+      
         
+class UserFundTransactionSerializer(serializers.ModelSerializer):
+    """Serializer for user fund transaction objects. """
+    
+    class Meta:
+        model = UserFundTransaction
+        fields = ('transaction_id',
+                  'transaction_type',
+                  'transaction_amount',
+                  'transaction_price_usd',
+                  'transaction_currency',
+                  'transaction_date')
+
+        read_only_fields = ('transaction_id', 'transaction_date')
+        
+    def save(self, user):
+        """Save the user fund transaction."""
+        transaction = UserFundTransaction.objects.create(
+            fund_wallet=UserFundWallet.objects.get(fund_wallet=UserWalletOverview.objects.get(user=user)),
+            transaction_type=self.validated_data['transaction_type'],
+            transaction_amount=self.validated_data['transaction_amount'],
+            transaction_price_usd=self.validated_data['transaction_price_usd'],
+            transaction_currency=self.validated_data['transaction_currency'],
+        )
+        return transaction
+    
+
+class UserFundWalletCryptoSerializer(serializers.ModelSerializer):
+    """Serializer for user fund wallet cryptocurrency objects."""
+    class Meta:
+        model = UserFundWalletCryptocurrency
+        fields = ('cryptocurrency_symbol', 'cryptocurrency_amount')
+        
+    def update(self, instance, validated_data):
+        symbol = validated_data['cryptocurrency_symbol']
+        amount_change = validated_data['cryptocurrency_amount']
+
+        if amount_change < 0 and instance.cryptocurrency_amount < abs(amount_change):
+            raise serializers.ValidationError({"error": "Not enough cryptocurrency to make the transaction."})
+
+        instance.cryptocurrency_amount += amount_change
+        instance.save()
+        return instance
